@@ -8,7 +8,7 @@ import json
 from invoice_extractor_server import extract_fields_from_image
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["*"])
 
 # Configure upload settings
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
