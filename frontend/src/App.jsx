@@ -242,7 +242,7 @@ function App() {
     if (!extractedData) return
 
     try {
-      const response = await fetch((import.meta.env.VITE_API_URL || '') + '/api/download-csv', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/download-csv`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
