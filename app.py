@@ -4,6 +4,7 @@ import os
 import tempfile
 import csv
 import io
+import json
 from invoice_extractor import extract_fields_from_image
 
 app = Flask(__name__)
@@ -14,6 +15,28 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+
+def flatten_invoice_data(data):
+    """Flatten nested invoice data for CSV export."""
+    flattened = {}
+    
+    def flatten_dict(d, prefix=''):
+        for key, value in d.items():
+            if isinstance(value, dict):
+                flatten_dict(value, f"{prefix}{key}_")
+            elif isinstance(value, list):
+                if key == 'items':
+                    # Handle items array specially
+                    for i, item in enumerate(value):
+                        for item_key, item_value in item.items():
+                            flattened[f"item_{i+1}_{item_key}"] = item_value
+                else:
+                    flattened[f"{prefix}{key}"] = str(value)
+            else:
+                flattened[f"{prefix}{key}"] = value
+    
+    flatten_dict(data)
+    return flattened
 
 @app.route('/api/extract', methods=['POST'])
 def extract_invoice_data():
@@ -75,11 +98,14 @@ def download_csv():
         # Create CSV content in memory
         output = io.StringIO()
         
+        # Flatten the structured data for CSV
+        flattened_data = flatten_invoice_data(data)
+        
         # Write CSV headers and data
-        fieldnames = list(data.keys())
+        fieldnames = list(flattened_data.keys())
         writer = csv.DictWriter(output, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerow(data)
+        writer.writerow(flattened_data)
         
         # Convert to bytes
         csv_content = output.getvalue()
@@ -99,6 +125,30 @@ def download_csv():
         
     except Exception as e:
         return jsonify({'error': f'CSV generation failed: {str(e)}'}), 500
+
+@app.route('/api/download-json', methods=['POST'])
+def download_json():
+    """Generate and download JSON file from extracted data."""
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        # Create a temporary file for download
+        temp_file = tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix='.json')
+        json.dump(data, temp_file, indent=2, ensure_ascii=False)
+        temp_file.close()
+        
+        return send_file(
+            temp_file.name,
+            as_attachment=True,
+            download_name='extracted_invoice_data.json',
+            mimetype='application/json'
+        )
+        
+    except Exception as e:
+        return jsonify({'error': f'JSON generation failed: {str(e)}'}), 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():

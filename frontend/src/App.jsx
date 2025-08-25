@@ -1,6 +1,173 @@
 import { useState, useRef } from 'react'
 import './App.css'
 
+// Component to display structured invoice data
+const InvoiceDataDisplay = ({ data }) => {
+  const renderSection = (title, sectionData, icon) => {
+    if (!sectionData || Object.keys(sectionData).length === 0) return null
+    
+    return (
+      <div className="mb-6 bg-gray-50 rounded-lg p-4">
+        <div className="flex items-center mb-3">
+          {icon}
+          <h3 className="text-md font-semibold text-gray-800 ml-2">{title}</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {Object.entries(sectionData).map(([key, value]) => 
+            (value !== null && value !== undefined && value !== '' && value !== '0') && (
+              <div key={key} className="bg-white p-3 rounded border">
+                <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                  {key.replace(/_/g, ' ')}
+                </dt>
+                <dd className="text-sm text-gray-900 font-medium">{value}</dd>
+              </div>
+            )
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  const renderItems = (items) => {
+    if (!items || !Array.isArray(items) || items.length === 0) return null
+    
+    return (
+      <div className="mb-6">
+        <div className="flex items-center mb-3">
+          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <h3 className="text-md font-semibold text-gray-800 ml-2">Items ({items.length})</h3>
+        </div>
+        <div className="space-y-4">
+          {items.map((item, index) => (
+            <div key={index} className="bg-white border rounded-lg p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
+                  Item {index + 1}
+                </span>
+                {item.amount && (
+                  <span className="text-lg font-bold text-green-600">
+                    ₹{parseFloat(item.amount).toLocaleString()}
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {Object.entries(item).map(([key, value]) => 
+                  (value !== null && value !== undefined && value !== '' && value !== '0') && (
+                    <div key={key} className="bg-gray-50 p-2 rounded">
+                      <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                        {key.replace(/_/g, ' ')}
+                      </dt>
+                      <dd className="text-sm text-gray-900 font-medium">{value}</dd>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Company Information */}
+      {renderSection(
+        'Company Information',
+        data.company_info,
+        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+      )}
+
+      {/* Invoice Information */}
+      {renderSection(
+        'Invoice Information',
+        data.invoice_info,
+        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      )}
+
+      {/* Billing Information */}
+      {renderSection(
+        'Billing Information',
+        data.billing_info,
+        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      )}
+
+      {/* Shipping Information */}
+      {renderSection(
+        'Shipping Information',
+        data.shipping_info,
+        <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+      )}
+
+      {/* Items */}
+      {renderItems(data.items)}
+
+      {/* Tax Information */}
+      {renderSection(
+        'Tax Information',
+        data.tax_info,
+        <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+      )}
+
+      {/* Totals */}
+      {data.totals && (
+        <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-4 border-2 border-green-200">
+          <div className="flex items-center mb-3">
+            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 className="text-md font-semibold text-gray-800 ml-2">Financial Summary</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {Object.entries(data.totals).map(([key, value]) => 
+              (value !== null && value !== undefined && value !== '' && value !== '0' && value !== 0) && (
+                <div key={key} className="bg-white p-3 rounded border">
+                  <dt className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                    {key.replace(/_/g, ' ')}
+                  </dt>
+                  <dd className="text-lg font-bold text-gray-900">
+                    ₹{parseFloat(value).toLocaleString()}
+                  </dd>
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Transport Information */}
+      {renderSection(
+        'Transport Information',
+        data.transport_info,
+        <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+        </svg>
+      )}
+
+      {/* Bank Information */}
+      {renderSection(
+        'Banking Information',
+        data.bank_info,
+        <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+        </svg>
+      )}
+    </div>
+  )
+}
+
 function App() {
   const [selectedFile, setSelectedFile] = useState(null)
   const [extractedData, setExtractedData] = useState(null)
@@ -98,6 +265,36 @@ function App() {
       window.URL.revokeObjectURL(url)
     } catch (err) {
       setError('Failed to download CSV: ' + err.message)
+    }
+  }
+
+  const downloadJSON = async () => {
+    if (!extractedData) return
+
+    try {
+      const response = await fetch('/api/download-json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(extractedData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate JSON')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.style.display = 'none'
+      a.href = url
+      a.download = 'extracted_invoice_data.json'
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      setError('Failed to download JSON: ' + err.message)
     }
   }
 
@@ -238,28 +435,32 @@ function App() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">Extracted Data</h2>
                 {extractedData && (
-                  <button
-                    onClick={downloadCSV}
-                    className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center space-x-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <span>Download CSV</span>
-                  </button>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={downloadJSON}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center space-x-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span>JSON</span>
+                    </button>
+                    <button
+                      onClick={downloadCSV}
+                      className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center space-x-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      <span>CSV</span>
+                    </button>
+                  </div>
                 )}
               </div>
 
               {extractedData ? (
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {Object.entries(extractedData).map(([key, value]) => (
-                    value && (
-                      <div key={key} className="border-b border-gray-100 pb-3 last:border-b-0">
-                        <dt className="text-sm font-medium text-gray-600 mb-1">{key}</dt>
-                        <dd className="text-sm text-gray-900 bg-gray-50 p-2 rounded">{value}</dd>
-                      </div>
-                    )
-                  ))}
+                <div className="max-h-96 overflow-y-auto">
+                  <InvoiceDataDisplay data={extractedData} />
                 </div>
               ) : (
                 <div className="text-center py-12">
