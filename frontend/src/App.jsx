@@ -220,7 +220,7 @@ function App() {
     formData.append('file', selectedFile)
 
     try {
-      const response = await fetch('/api/extract', {
+      const response = await fetch((import.meta.env.VITE_API_URL || '') + '/api/extract', {
         method: 'POST',
         body: formData,
       })
@@ -242,7 +242,7 @@ function App() {
     if (!extractedData) return
 
     try {
-      const response = await fetch('/api/download-csv', {
+      const response = await fetch((import.meta.env.VITE_API_URL || '') + '/api/download-csv', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -272,7 +272,7 @@ function App() {
     if (!extractedData) return
 
     try {
-      const response = await fetch('/api/download-json', {
+      const response = await fetch((import.meta.env.VITE_API_URL || '') + '/api/download-json', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
