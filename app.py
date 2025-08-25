@@ -5,7 +5,7 @@ import tempfile
 import csv
 import io
 import json
-from invoice_extractor import extract_fields_from_image
+from invoice_extractor_server import extract_fields_from_image
 
 app = Flask(__name__)
 CORS(app, origins="invoice-tau-lime.vercel.app")
