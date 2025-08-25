@@ -52,13 +52,98 @@ def extract_fields_from_image(image_path: str) -> Tuple[Dict[str, str], str]:
             img_data = img_file.read()
         
         # Prepare the prompt
-        prompt = f"""Extract the following fields from this invoice. 
-        If a field is not present, leave it as null. Return the response in JSON format only.
+        prompt = """Extract all data from this GST invoice and return it in a structured JSON format. 
         
-        Fields to extract: {', '.join(FIELDS)}
+        For invoices with multiple items, create an array of items with all their details.
         
-        Return the response in this JSON format:
-        {{"field1": "value1", "field2": "value2", ...}}"""
+        Return the response in this exact JSON structure:
+        {
+          "company_info": {
+            "company_name": "string",
+            "company_address": "string", 
+            "city": "string",
+            "pincode": "string",
+            "gstin": "string",
+            "email": "string",
+            "phone": "string",
+            "website_url": "string",
+            "pan_number": "string",
+            "state_and_state_code": "string",
+            "contact_person_name": "string"
+          },
+          "invoice_info": {
+            "gst_invoice_number": "string",
+            "invoice_date": "string",
+            "invoice_type": "string",
+            "challan_number": "string",
+            "challan_date": "string",
+            "purchase_order_number": "string",
+            "purchase_order_date": "string",
+            "place_of_supply": "string",
+            "place_of_delivery": "string",
+            "reverse_charge_applicable": "string",
+            "e_invoice_irn": "string",
+            "e_way_bill_number": "string",
+            "qr_code": "string"
+          },
+          "billing_info": {
+            "billing_company_name": "string",
+            "billing_address": "string",
+            "billing_city": "string", 
+            "billing_pincode": "string",
+            "billing_party_gstin": "string",
+            "email_and_phone_of_buyer": "string"
+          },
+          "shipping_info": {
+            "shipping_company_name": "string",
+            "shipping_address": "string",
+            "shipping_city": "string",
+            "shipping_pincode": "string", 
+            "shipping_party_gstin": "string"
+          },
+          "items": [
+            {
+              "description_of_goods": "string",
+              "hsn_code": "string",
+              "quantity": "number",
+              "uqc": "string",
+              "weight": "string",
+              "rate": "number",
+              "amount": "number",
+              "discount_per_item": "number",
+              "taxable_value": "number",
+              "batch_no": "string",
+              "expiry_date": "string",
+              "manufacturing_date": "string"
+            }
+          ],
+          "tax_info": {
+            "cgst": "number",
+            "sgst": "number", 
+            "igst": "number",
+            "cess_amount": "number"
+          },
+          "totals": {
+            "invoice_amount": "number",
+            "total_invoice": "number"
+          },
+          "transport_info": {
+            "transporter_details": "string",
+            "vehicle_number": "string",
+            "lr_number": "string",
+            "transporter_id": "string"
+          },
+          "bank_info": {
+            "bank_details": "string"
+          }
+        }
+        
+        IMPORTANT INSTRUCTIONS:
+        1. If any field is not present or not applicable, set it to null
+        2. For items array, include ALL items found on the invoice with their complete details
+        3. Make sure all numerical values are properly formatted as numbers, not strings
+        4. Only extract data that is actually present on the invoice
+        5. Do not make up or assume any values"""
         
         # Generate content
         response = MODEL.generate_content([prompt, {"mime_type": "image/jpeg", "data": img_data}])
