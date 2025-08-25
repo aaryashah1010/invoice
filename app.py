@@ -8,6 +8,7 @@ import json
 from invoice_extractor_server import extract_fields_from_image
 
 app = Flask(__name__)
+
 CORS(app, origins=["*"])
 
 # Configure upload settings
